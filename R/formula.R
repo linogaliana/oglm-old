@@ -1,3 +1,14 @@
+#' Obtain model formula for an `oglm` object
+#'
+#' Given an object of class `oglm` the function describes
+#' the estimated model via an expression of class [stats::formula()].
+#' The function serves to provide a name of a model to the [lmtest::lrtest()]
+#'
+#' @param x object of class `oglmx`
+#' @param ... Additional arguments, currently ignored.
+#' @return an object of class `formula`.
+
+
 formula.oglmx<-function(x, ...){
   # extract the formula for an oglmx object
   # for use to apply a model name in lrtest
