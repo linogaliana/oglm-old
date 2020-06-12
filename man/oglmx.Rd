@@ -18,6 +18,7 @@ oglmx(
   threshparam = NULL,
   analhessian = TRUE,
   sdmodel = expression(exp(z)),
+  optmeth = c("NR", "BFGS", "BFGSR", "BHHH", "SANN", "CG", "NM"),
   SameModelMEANSD = FALSE,
   na.action,
   savemodelframe = FALSE,
@@ -98,6 +99,9 @@ for the standard deviation into the standard deviation.
 The expression should be written as a function of variable \code{z}.
 The default value is \code{expression(exp(z))}.}
 
+\item{optmeth}{specifies a method for the maximisation of the likelihood
+passed to \code{\link[maxLik:maxLik]{maxLik::maxLik()}}. Default to \emph{NR} (Newton-Raphson)}
+
 \item{SameModelMEANSD}{logical. Indicates whether the matrix used to
 model the mean of the latent variable is identical to that used
 to model the variance. If \code{formulaSD=NULL} and \code{SameModelMEANSD=TRUE} a
@@ -128,8 +132,6 @@ BHHH estimate of the meat in the sandwich of the
 variance-covariance matrix is calculated. If calculated
 standard errors will be calculated using the sandwich estimator
 by default when calling \code{summary}.}
-
-\item{optmeth}{specifies a method for the maximisation of the likelihood}
 }
 \value{
 An object of class "\code{oglmx}" with the following components:

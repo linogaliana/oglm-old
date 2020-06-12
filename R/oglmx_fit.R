@@ -6,7 +6,22 @@
 #   of length equal to the number of rows in the data frame.
 #   Used to apply weighted maximum likelihood estimation.
 
-oglmx.fit<-function(Y,X,Z=NULL,w,link="probit",sdmodel=expression(exp(z)),SameModelMEANSD=FALSE,beta=NULL,delta=NULL,threshparam=NULL,analhessian=TRUE,robustmatrix=FALSE,start=NULL,savemodelframe=FALSE){
+oglmx.fit <- function(
+  Y, X,
+  Z=NULL, w,
+  link = "probit",
+  sdmodel = expression(exp(z)),
+  SameModelMEANSD = FALSE,
+  beta = NULL, delta = NULL,
+  threshparam = NULL,
+  analhessian = TRUE,
+  robustmatrix = FALSE,
+  start = NULL,
+  savemodelframe=FALSE,
+  optmeth = c("NR", "BFGS", "BFGSR", "BHHH", "SANN", "CG", "NM")){
+
+  optmeth <- match.arg(optmeth)
+
   Xr<-split.data.frame(X,Y,drop=FALSE)
   no.outcomes<-length(Xr)
   No.Obs<-length(Y)
@@ -161,7 +176,10 @@ oglmx.fit<-function(Y,X,Z=NULL,w,link="probit",sdmodel=expression(exp(z)),SameMo
 
 
   # function that calculates log likelihood, gradient and hessian given a set of parameter values
-  LLoglmx<-function(param,beta=NULL,delta=NULL,threshparam=NULL,analhessian=FALSE,robustmatrix=FALSE){
+  LLoglmx <- function(param,
+                      beta=NULL,delta=NULL,
+                      threshparam=NULL, analhessian=FALSE,
+                      robustmatrix=FALSE){
     if (is.null(beta)){ # if elements of the vector beta are not prespecified then all are included in param
       beta<-param[1:no.Xvar]
       param<-param[(no.Xvar+1):length(param)] # remove from param the elements allocated to the beta vector
@@ -533,7 +551,8 @@ oglmx.fit<-function(Y,X,Z=NULL,w,link="probit",sdmodel=expression(exp(z)),SameMo
   # the maxLik function used to maximise the log-likelihood requires a function of only the estimated parameters.
   LLoglmxTOP<-function(param){LLoglmx(param,beta=beta,delta=delta,threshparam=threshparam,analhessian=analhessian)}
   # call maxLik to estimate parameters
-  maxLikRes<-maxLik(LLoglmxTOP,start=start,iterlim=300,finalHessian=TRUE,method="NR")
+  maxLikRes<-maxLik::maxLik(LLoglmxTOP,start=start,iterlim=300,finalHessian=TRUE,
+                            method=optmeth)
   # just remains to extract results and store.
   #stop("getshere")
   coefficients<-maxLikRes$estimate

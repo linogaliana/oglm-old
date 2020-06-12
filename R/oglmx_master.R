@@ -86,6 +86,7 @@
 #'   standard errors will be calculated using the sandwich estimator
 #'   by default when calling `summary`.
 #' @param optmeth specifies a method for the maximisation of the likelihood
+#'   passed to [maxLik::maxLik()]. Default to *NR* (Newton-Raphson)
 #' @inheritParams stats::glm
 #'
 #' @return An object of class "\code{oglmx}" with the following components:
@@ -203,14 +204,26 @@
 #' @import stats
 #' @export
 
-oglmx <- function(formulaMEAN,formulaSD=NULL,
-                data,start=NULL,weights=NULL,
-                link="probit",constantMEAN=TRUE,
-                constantSD=TRUE,beta=NULL,delta=NULL,
-                threshparam=NULL,analhessian=TRUE,sdmodel=expression(exp(z)),
-                SameModelMEANSD=FALSE,na.action,savemodelframe=FALSE,
-                Force=FALSE,robust=FALSE){
-  call<-match.call()
+oglmx <- function(formulaMEAN,
+                  formulaSD=NULL,
+                  data,
+                  start=NULL,weights=NULL,
+                  link="probit",
+                  constantMEAN=TRUE, constantSD=TRUE,
+                  beta=NULL,delta=NULL,
+                  threshparam=NULL,
+                  analhessian=TRUE,
+                  sdmodel=expression(exp(z)),
+                  optmeth = c("NR", "BFGS", "BFGSR", "BHHH", "SANN", "CG", "NM"),
+                  SameModelMEANSD=FALSE,
+                  na.action,
+                  savemodelframe=FALSE,
+                  Force=FALSE,
+                  robust=FALSE){
+
+  optmeth <- match.arg(optmeth)
+  call <- match.call()
+
   names(call)[match("formulaMEAN",names(call),0)]<-"formula"
   m<-match(c("formula","data","subset","weights", "na.action", "offset"),names(call),0)
   mf<-call[c(1L,m)]
@@ -323,7 +336,15 @@ oglmx <- function(formulaMEAN,formulaSD=NULL,
   listoutcomes<-checkoutcomes[[1]]
   no.outcomes<-checkoutcomes[[2]]
   #return(list(Y,X,X,weights,link,sdmodel,beta,delta,threshparam,analhessian,robust,start))
-  output<-oglmx.fit(Y,X,Z,w=weights,link = link,sdmodel = sdmodel,beta=beta,delta=delta,threshparam=threshparam,analhessian=analhessian,robustmatrix=robust,start=start,savemodelframe=savemodelframe)
+  output<-oglmx.fit(Y,X,Z,w=weights,
+                    link = link,sdmodel = sdmodel,
+                    beta=beta,delta=delta,
+                    threshparam=threshparam,
+                    analhessian=analhessian,
+                    robustmatrix=robust,
+                    start=start,
+                    savemodelframe=savemodelframe,
+                    optmeth = optmeth)
   output<-append(output,list(call=call,terms=termsMODEL,formula=formulaMODEL,NoVarModData=NoVarModData,Hetero=Heteroskedastic,BothEq=BothMeanVar,varMeans=list(XVarMeans,ZVarMeans),varBinary=list(XVarBinary,ZVarBinary)))
   class(output)<-"oglmx"
   output
