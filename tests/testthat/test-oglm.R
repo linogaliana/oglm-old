@@ -32,10 +32,6 @@ testthat::test_that("Default method to Newton-Raphson", {
                       data=dataset,link="probit",constantMEAN=FALSE,
                       constantSD=FALSE,delta=0,threshparam=NULL,
                       optmeth = "NR")
-  mod3 <- oglm::oglmx(y ~ x1 + x2 + z,
-                      data=dataset,link="probit",constantMEAN=FALSE,
-                      constantSD=FALSE,delta=0,threshparam=NULL,
-                      optmeth = "nr")
   mod1$call <- NULL
   mod2$call <- NULL
 
