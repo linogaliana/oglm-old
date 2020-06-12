@@ -12,6 +12,8 @@ RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)
 Depends: maxLik
 Imports: stats
-Suggests: glmx, lmtest
+Suggests: 
+    glmx,
+    lmtest,
+    testthat
 NeedsCompilation: no
-
