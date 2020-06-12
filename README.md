@@ -24,6 +24,6 @@ devtools::install_github("linogaliana/oglm")
 
 This :package: has a few difference with `oglmx` :package: that are listed here:
 
-* The :package: presents some tests and is built using continuous integration ! 
+* The :package: presents some tests and is built using continuous integration (based on `travis`) ! 
 * `predict` method
 * ...
