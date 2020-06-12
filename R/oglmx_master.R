@@ -21,9 +21,6 @@
 #' @param start either `NULL` or a numeric vector specifying
 #'   start values for each of the estimated parameters,
 #'   passed to the maximisation routine.
-#' @param weightseither either `NULL` or a numeric vector
-#'   of length equal to the number of rows in the data frame.
-#'   Used to apply weighted maximum likelihood estimation.
 #' @param link specifies a link function for the model to be
 #'   estimated, accepted values are *"probit"*,
 #'   *"logit"*, *"cauchit"*, *"loglog"* and *"cloglog"*
@@ -88,10 +85,6 @@
 #'   variance-covariance matrix is calculated. If calculated
 #'   standard errors will be calculated using the sandwich estimator
 #'   by default when calling `summary`.
-#' @param outcomeMatrix,X,Z `X` is a data matrix for the right hand side of
-#'   the mean equation, `outcomeMatrix` is a matrix that indicates the
-#'   outcome variable and `Z` is a data matrix for the variance equation.
-#' @param w specifies a vector of weights for the `oglmx.fit` function.
 #' @param optmeth specifies a method for the maximisation of the likelihood
 #' @inheritParams stats::glm
 #'
@@ -104,8 +97,7 @@
 #'     \item{no.iterations}{number of iterations of maximisation algorithm.}
 #'     \item{coefficients}{named vector of estimated parameters.}
 #'     \item{returnCode}{code returned by
-#'       the `maxLik` optimisation routine. For details of meaning
-#'       see [logLik::logLik()]}
+#'       the `maxLik` optimisation routine}
 #'     \item{call}{the call used to generate the results.}
 #'     \item{gradient}{numeric vector, the value of the
 #'       gradient of the log-likelihood function at the obtained
@@ -156,7 +148,7 @@
 #'       elements, the model frames for the mean and variance equations.}
 #' }
 #'
-#' @examples
+#' @examples \dontrun{
 #' # create random sample, three variables, two binary.
 #' set.seed(242)
 #' n<-250
@@ -205,7 +197,10 @@
 #' summary(results.oprobhet2)
 #' margins.oglmx(results.oprobhet2)
 #' # marginal effects are again identical. Parameter estimates do change.
+#' }
 #'
+#' @import maxLik
+#' @import stats
 #' @export
 
 oglmx <- function(formulaMEAN,formulaSD=NULL,

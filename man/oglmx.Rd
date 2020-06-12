@@ -129,16 +129,6 @@ variance-covariance matrix is calculated. If calculated
 standard errors will be calculated using the sandwich estimator
 by default when calling \code{summary}.}
 
-\item{weightseither}{either \code{NULL} or a numeric vector
-of length equal to the number of rows in the data frame.
-Used to apply weighted maximum likelihood estimation.}
-
-\item{outcomeMatrix, X, Z}{\code{X} is a data matrix for the right hand side of
-the mean equation, \code{outcomeMatrix} is a matrix that indicates the
-outcome variable and \code{Z} is a data matrix for the variance equation.}
-
-\item{w}{specifies a vector of weights for the \code{oglmx.fit} function.}
-
 \item{optmeth}{specifies a method for the maximisation of the likelihood}
 }
 \value{
@@ -151,8 +141,7 @@ only model and the number of observations.}
 \item{no.iterations}{number of iterations of maximisation algorithm.}
 \item{coefficients}{named vector of estimated parameters.}
 \item{returnCode}{code returned by
-the \code{maxLik} optimisation routine. For details of meaning
-see \code{\link[logLik:logLik]{logLik::logLik()}}}
+the \code{maxLik} optimisation routine}
 \item{call}{the call used to generate the results.}
 \item{gradient}{numeric vector, the value of the
 gradient of the log-likelihood function at the obtained
@@ -213,6 +202,7 @@ and ordered logit are included in the diverse
 set of models estimated by the function.
 }
 \examples{
+\dontrun{
 # create random sample, three variables, two binary.
 set.seed(242)
 n<-250
@@ -261,5 +251,6 @@ results.oprobhet2<-oglmx(y ~ x1 + x2 + z, ~ x1 + x2, data=dataset, link="probit"
 summary(results.oprobhet2)
 margins.oglmx(results.oprobhet2)
 # marginal effects are again identical. Parameter estimates do change.
+}
 
 }

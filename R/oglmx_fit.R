@@ -1,3 +1,11 @@
+# @param outcomeMatrix,X,Z `X` is a data matrix for the right hand side of
+#   the mean equation, `outcomeMatrix` is a matrix that indicates the
+#   outcome variable and `Z` is a data matrix for the variance equation.
+# @param w specifies a vector of weights for the `oglmx.fit` function.
+# @param weightseither either `NULL` or a numeric vector
+#   of length equal to the number of rows in the data frame.
+#   Used to apply weighted maximum likelihood estimation.
+
 oglmx.fit<-function(Y,X,Z=NULL,w,link="probit",sdmodel=expression(exp(z)),SameModelMEANSD=FALSE,beta=NULL,delta=NULL,threshparam=NULL,analhessian=TRUE,robustmatrix=FALSE,start=NULL,savemodelframe=FALSE){
   Xr<-split.data.frame(X,Y,drop=FALSE)
   no.outcomes<-length(Xr)
