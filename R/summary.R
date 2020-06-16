@@ -1,7 +1,10 @@
-summary.oglmx<-function(object,tol=1e-20, ... ){
+#' @export
+
+summary.oglmx <- function(object, tol=1e-20, ... ){
+
   stdEr.oglmx<-diag(vcov(object,tol=tol))^0.5
   t<-object$coefficients/stdEr.oglmx
-  p <- 2*pnorm( -abs( t))
+  p <- 2*pnorm(-abs( t))
   results <- cbind("Estimate"=object$coefficients,
                    "Std. error"=stdEr.oglmx,
                    "t value"=t, "Pr(>|t|)"=p)
@@ -44,4 +47,3 @@ print.summary.oglmx<-function(x, ... ){
     printCoefmat(x$estimateDisplay[[3]])
   }
 }
-
