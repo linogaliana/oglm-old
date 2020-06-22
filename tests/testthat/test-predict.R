@@ -169,11 +169,11 @@ lbounds <- log(bounds)
 
 
 
-ordered_probit <- REtage::ordered_model_threshold(
-  dataset,
-  formula = "y ~ x1+x2",
+ordered_probit <- oglmx(
+  data = dataset,
+  formulaMEAN = "y ~ x1+x2",
   link = "probit",
-  thresholds = lbounds,
+  threshparam = lbounds,
   constantSD = TRUE)
 
 
