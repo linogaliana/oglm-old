@@ -8,11 +8,11 @@ iris$y <- sample(1:5, size = nrow(iris),
 
 # A/ NO formulaSD ARGUMENT -----
 
-ordered_logit <- REtage::ordered_model_threshold(
-  iris,
-  formula = "y ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",
+ordered_logit <- oglmx(
+  data = iris,
+  formulaMEAN = "y ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",
   link = "logit",
-  thresholds = NULL, constantSD = FALSE,
+  threshparam = NULL, constantSD = FALSE,
   constantMEAN = FALSE, delta = 0)
 
 
