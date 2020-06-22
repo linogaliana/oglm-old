@@ -17,5 +17,6 @@ Suggests:
     lmtest,
     testthat,
     covr,
-    MASS
+    MASS,
+    oglmx
 NeedsCompilation: no
