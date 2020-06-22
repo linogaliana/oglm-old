@@ -37,12 +37,12 @@ testthat::test_that(
 
 # B/ MODEL HAS A formulaSD ARGUMENT
 
-ordered_logit <- REtage::ordered_model_threshold(
-  iris,
-  formula = "y ~ Sepal.Length + Sepal.Width",
+ordered_logit <- oglmx(
+  data = iris,
+  formulaMEAN = "y ~ Sepal.Length + Sepal.Width",
   formulaSD = as.formula("y ~ Sepal.Width"),
   link = "logit",
-  thresholds = NULL,
+  threshparam = NULL,
   constantMEAN = FALSE, delta = 0)
 
 testthat::expect_error(
