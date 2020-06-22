@@ -21,7 +21,7 @@ oglmx(
   optmeth = c("NR", "BFGS", "BFGSR", "BHHH", "SANN", "CG", "NM"),
   SameModelMEANSD = FALSE,
   na.action,
-  savemodelframe = FALSE,
+  savemodelframe = TRUE,
   Force = FALSE,
   robust = FALSE
 )
@@ -217,7 +217,7 @@ latenty<-0.5+1.5*x1-0.5*x2+0.5*z+rnorm(n,sd=exp(0.5*x1-0.5*x2))
 # observed y has four possible values: -1,0,1,2
 # threshold values are: -0.5, 0.5, 1.5.
 y<-vector("numeric",n)
-y[latenty< -0.5]<--1
+y[latenty< -0.5]<- -1
 y[latenty>= -0.5 & latenty<0.5]<- 0
 y[latenty>= 0.5 & latenty<1.5]<- 1
 y[latenty>= 1.5]<- 2
