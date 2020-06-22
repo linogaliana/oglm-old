@@ -69,10 +69,10 @@ testthat::test_that("Raise error when argument not matched", {
 testthat::test_that(
   "Excepting call and formula, elements are the same", {
 
-    formulastr <- oglm::oglmx("y ~ x1 + x2 + z",
+    formulastr <- oglm::oglmx("y ~ x1 + x2",
                               data=dataset,link="probit",constantMEAN=FALSE,
                               constantSD=FALSE,delta=0,threshparam=NULL)
-    formulaformal <- oglm::oglmx(y ~ x1 + x2 + z,
+    formulaformal <- oglm::oglmx(y ~ x1 + x2,
                                  data=dataset,link="probit",constantMEAN=FALSE,
                                  constantSD=FALSE,delta=0,threshparam=NULL)
 
@@ -91,11 +91,11 @@ testthat::test_that(
 
 testthat::test_that(
   "Same call produces an error with oglmx package", {
-    oglm::oglmx("y ~ x1 + x2 + z",
+    oglm::oglmx("y ~ x1 + x2",
                 data=dataset,link="probit",constantMEAN=FALSE,
                 constantSD=FALSE,delta=0,threshparam=NULL)
     testthat::expect_error(
-      oglmx::oglmx("y ~ x1 + x2 + z",
+      oglmx::oglmx("y ~ x1 + x2",
                    data=dataset,link="probit",constantMEAN=FALSE,
                    constantSD=FALSE,delta=0,threshparam=NULL)
     )
