@@ -19,9 +19,9 @@ ordered_logit_MASS <- MASS::polr("I(factor(y)) ~ Sepal.Length + Sepal.Width + Pe
                                  Hess = TRUE,
                                  method = "logistic")
 
-ordered_probit <- REtage::ordered_model_threshold(
-  iris,
-  formula = "y ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",
+ordered_probit <- oglm::oglmx(
+  data = iris,
+  formulaMEAN = "y ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",
   link = "probit",
   thresholds = NULL, constantSD = FALSE,
   constantMEAN = FALSE, delta = 0)
