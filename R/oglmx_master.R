@@ -162,7 +162,7 @@
 #' # observed y has four possible values: -1,0,1,2
 #' # threshold values are: -0.5, 0.5, 1.5.
 #' y<-vector("numeric",n)
-#' y[latenty< -0.5]<--1
+#' y[latenty< -0.5]<- -1
 #' y[latenty>= -0.5 & latenty<0.5]<- 0
 #' y[latenty>= 0.5 & latenty<1.5]<- 1
 #' y[latenty>= 1.5]<- 2
@@ -232,12 +232,13 @@ oglmx <- function(formulaMEAN,
   mf<-eval(mf,parent.frame())
   weights<-as.vector(model.weights(mf))
   termsMEAN<-terms(mf)
-  X<-model.matrix(formulaMEAN,mf)
-  Y<-model.response(mf,"numeric")
+  X <- model.matrix(as.formula(formulaMEAN),
+                  mf)
+  Y <- model.response(mf,"numeric")
   Keep<-!is.na(Y) & !apply(X,1,.IsNARow)
   if (!is.null(formulaSD) & !SameModelMEANSD){
     dataframeSD<-model.frame(formulaSD,data=data,na.action=na.pass)
-    Z<-model.matrix(formulaSD,dataframeSD)
+    Z<-model.matrix(as.formula(formulaSD),dataframeSD)
     Keep<-Keep & !apply(Z,1,.IsNARow)
     Z<-Z[Keep, ,drop=FALSE]
     termsSD<-terms(dataframeSD)
@@ -271,7 +272,7 @@ oglmx <- function(formulaMEAN,
 
   No.Obs<-length(Y)
   termsMODEL<-list(termsMEAN,termsSD)
-  formulaMODEL<-list(formulaMEAN,formulaSD)
+  formulaMODEL<-list('meaneq' = formulaMEAN, 'sdeq' = formulaSD)
   # If specified that there is no constant in the model remove it from the data frame.
   if (!constantMEAN){
     savecolnames<-colnames(X)[colnames(X)!="(Intercept)"]

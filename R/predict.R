@@ -47,7 +47,7 @@ predict.oglmx <- function (object, newdata = NULL, type = c("class", "probs","la
   # --------------------------------------------------
 
   # Transform formula in terms
-  object$terms <- terms(formula)
+  object$terms <- terms(as.formula(formula))
 
   # Keep only covariates
   Terms <- delete.response(object$terms)

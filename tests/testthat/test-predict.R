@@ -1,16 +1,18 @@
-context("Predictions are equivalent to MASS::predict method for polr")
+testthat::context("Predictions are equivalent to MASS::predict method for polr")
 
 iris$y <- sample(1:5, size = nrow(iris),
                  replace = TRUE)
 
 
 
-ordered_logit <- REtage::ordered_model_threshold(
-  iris,
-  formula = "y ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",
+ordered_logit <- oglm::oglmx(
+  data = iris,
+  formulaMEAN = "y ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",
   link = "logit",
-  thresholds = NULL, constantSD = FALSE,
-  constantMEAN = FALSE, delta = 0)
+  threshparam = NULL,
+  constantSD = FALSE,
+  constantMEAN = FALSE,
+  delta = 0)
 
 ordered_logit_MASS <- MASS::polr("I(factor(y)) ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",
                                  data = iris,
