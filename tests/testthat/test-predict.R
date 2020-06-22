@@ -23,7 +23,7 @@ ordered_probit <- oglm::oglmx(
   data = iris,
   formulaMEAN = "y ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",
   link = "probit",
-  thresholds = NULL, constantSD = FALSE,
+  threshparam = NULL, constantSD = FALSE,
   constantMEAN = FALSE, delta = 0)
 
 ordered_probit_MASS <- MASS::polr("I(factor(y)) ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width",

@@ -17,7 +17,7 @@ oglmx.fit <- function(
   analhessian = TRUE,
   robustmatrix = FALSE,
   start = NULL,
-  savemodelframe=FALSE,
+  savemodelframe=TRUE,
   optmeth = c("NR", "BFGS", "BFGSR", "BHHH", "SANN", "CG", "NM")){
 
   optmeth <- match.arg(optmeth)
@@ -164,11 +164,11 @@ oglmx.fit <- function(
 
   # save model frame if requested
   if (savemodelframe){
-    modelframes<-list(X)
+    modelframes<-list('X' = X)
     if (!SameModelMEANSD){
-      modelframes[[2]]<-Z
+      modelframes[['Z']]<-Z
     } else {
-      modelframes[[2]]<-X
+      modelframes[['X']]<-X
     }
   } else {
     modelframes<-NULL

@@ -217,7 +217,7 @@ oglmx <- function(formulaMEAN,
                   optmeth = c("NR", "BFGS", "BFGSR", "BHHH", "SANN", "CG", "NM"),
                   SameModelMEANSD=FALSE,
                   na.action,
-                  savemodelframe=FALSE,
+                  savemodelframe=TRUE,
                   Force=FALSE,
                   robust=FALSE){
 
@@ -288,8 +288,8 @@ oglmx <- function(formulaMEAN,
   if (!is.null(formulaSD)){
     # will check if the formula for the mean is identical to the
     # the right hand side variables of a formula are accessible via terms in the attribute term.labels
-    meaneqnames<-attr(terms(formulaMEAN),"term.labels")
-    sdeqnames<-attr(terms(formulaSD),"term.labels")
+    meaneqnames<-attr(terms(as.formula(formulaMEAN)),"term.labels")
+    sdeqnames<-attr(terms(as.formula(formulaSD)),"term.labels")
     if (sum(is.na(match(meaneqnames,sdeqnames)))==sum(is.na(match(sdeqnames,meaneqnames))) & sum(is.na(match(sdeqnames,meaneqnames)))==0){
       if (constantSD==constantMEAN){
         SameModelMEANSD<-TRUE

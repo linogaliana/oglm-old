@@ -40,7 +40,7 @@ testthat::test_that(
 ordered_logit <- oglmx(
   data = iris,
   formulaMEAN = "y ~ Sepal.Length + Sepal.Width",
-  formulaSD = as.formula("y ~ Sepal.Width"),
+  formulaSD = "y ~ Sepal.Width",
   link = "logit",
   threshparam = NULL,
   constantMEAN = FALSE, delta = 0)

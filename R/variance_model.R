@@ -6,6 +6,8 @@ variance_model <- function(object, newdata = NULL,
   # WHEN newdata is NULL, we use the initial object
   if (is.null(newdata)) newdata <- object$modelframes$Z
 
+  # If newdata is still NULL, we use X
+  if (is.null(newdata)) newdata <- object$modelframes$X
 
   if (!is.null(object$formula$sdeq)) {
     # if (object$constantSD) {
@@ -17,7 +19,7 @@ variance_model <- function(object, newdata = NULL,
     # } else{
     Z <- newdata
     # }
-    Z <- model.matrix(object$formula$sdeq, data.frame(Z))
+    Z <- model.matrix(as.formula(object$formula$sdeq), data.frame(Z))
   }
   else {
     Z <- matrix(rep(1, nrow(newdata)), ncol = 1)
