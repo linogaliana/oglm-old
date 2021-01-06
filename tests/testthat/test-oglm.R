@@ -113,9 +113,7 @@ testthat::test_that(
 
 requireNamespace("haven", quietly = TRUE)
 
-stata <- data.table::data.table(
-  haven::read_dta("http://www.stata-press.com/data/r13/womenwage.dta")
-)
+stata <- haven::read_dta("http://www.stata-press.com/data/r13/womenwage.dta")
 
 wage_lbounds <- sort(as.numeric(
   unique(as.character(stata$wagecat)))
