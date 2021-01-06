@@ -4,6 +4,7 @@
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Travis build status](https://travis-ci.com/linogaliana/oglm.svg?branch=master)](https://travis-ci.com/linogaliana/oglm)
 [![Codecov test coverage](https://codecov.io/gh/linogaliana/oglm/branch/master/graph/badge.svg)](https://codecov.io/gh/linogaliana/oglm?branch=master)
+[![R build status](https://github.com/linogaliana/oglm/workflows/R-CMD-check/badge.svg)](https://github.com/linogaliana/oglm/actions)
 <!-- badges: end -->
 
 A package to work with interval regression and ordered logit and probit models
