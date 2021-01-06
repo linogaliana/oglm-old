@@ -204,149 +204,144 @@
 #' @import stats
 #' @export
 
-oglmx <- function(formulaMEAN,
-                  formulaSD=NULL,
-                  data,
-                  start=NULL,weights=NULL,
-                  link="probit",
-                  constantMEAN=TRUE, constantSD=TRUE,
-                  beta=NULL,delta=NULL,
-                  threshparam=NULL,
-                  analhessian=TRUE,
-                  sdmodel=expression(exp(z)),
-                  optmeth = c("NR", "BFGS", "BFGSR", "BHHH", "SANN", "CG", "NM"),
-                  SameModelMEANSD=FALSE,
-                  na.action,
-                  savemodelframe=TRUE,
-                  Force=FALSE,
-                  robust=FALSE){
+oglmx<-function(formulaMEAN, formulaSD=NULL, data, start=NULL, weights=NULL, link="probit",
+                constantMEAN=TRUE, constantSD=TRUE, beta=NULL, delta=NULL, threshparam=NULL,
+                analhessian=TRUE, sdmodel=expression(exp(z)), SameModelMEANSD=FALSE, na.action,
+                savemodelframe=TRUE, Force=FALSE, robust=FALSE){
+  cl<-match.call()
+  oglmxoutput<-list()
+  fitinput<-list()
+  fitinput$analhessian<-analhessian
+  fitinput$sdmodel<-sdmodel
+  fitinput$robust<-robust
+  fitinput$link<-link
+  oglmxoutput$link<-link
+  oglmxoutput$sdmodel<-sdmodel
+  oglmxoutput$call<-cl
+  # if (!constantMEAN){formulaMEAN<-update(formulaMEAN,~0+.)}
 
-  optmeth <- match.arg(optmeth)
-  call <- match.call()
+  if (!is.null(formulaSD)){
+    #  if (!constantSD){formulaSD<-update(formulaSD,~0+.)}
+    cl$formulaMEAN<-mergeformulas(formulaMEAN,formulaSD)
+  } else if (SameModelMEANSD){
+    formulaSD<-formulaMEAN
+  }
 
-  names(call)[match("formulaMEAN",names(call),0)]<-"formula"
-  m<-match(c("formula","data","subset","weights", "na.action", "offset"),names(call),0)
-  mf<-call[c(1L,m)]
+
+  names(cl)[match("formulaMEAN",names(cl))]<-"formula"
+  #return(cl)
+  m<-match(c("formula","data","subset","weights","na.action","offset"),names(cl),0L)
+  mf<-cl[c(1L,m)]
   mf$drop.unused.levels <- TRUE
-  mf[[1L]]<- quote(stats::model.frame)
+  mf[[1L]] <- quote(stats::model.frame)
   mf<-eval(mf,parent.frame())
-  weights<-as.vector(model.weights(mf))
-  termsMEAN<-terms(mf)
-  X <- model.matrix(as.formula(formulaMEAN),
-                  mf)
-  Y <- model.response(mf,"numeric")
-  Keep<-!is.na(Y) & !apply(X,1,.IsNARow)
-  if (!is.null(formulaSD) & !SameModelMEANSD){
-    dataframeSD<-model.frame(formulaSD,data=data,na.action=na.pass)
-    Z<-model.matrix(as.formula(formulaSD),dataframeSD)
-    Keep<-Keep & !apply(Z,1,.IsNARow)
-    Z<-Z[Keep, ,drop=FALSE]
-    termsSD<-terms(dataframeSD)
-    # If specified that there is no constant in the model remove it from the data frame.
-    if (!constantSD & ncol(Z)>1){
-      savecolnamesZ<-colnames(Z)[colnames(Z)!="(Intercept)"]
-      Z<-Z[,colnames(Z)!="(Intercept)",drop=FALSE]
-      colnames(Z)<-savecolnamesZ
-    }
-  } else {
-    termsSD<-NULL
-  }
-  X<-X[Keep, ,drop=FALSE]
-  Y<-Y[Keep]
-  if (!is.null(weights)){
-    weights<-weights[Keep]
-    robust<-TRUE
-    X<-X[!is.na(weights), ,drop=FALSE]
-    Y<-Y[!is.na(weights)]
-    if (!is.null(formulaSD) & !SameModelMEANSD){
-      Z<-Z[!is.na(weights), ,drop=FALSE]
-    }
-    weights<-weights[!is.na(weights)]
-    weighted<-TRUE
-    weights<-weights*length(weights)/sum(weights)
-  } else {
-    weights<-rep_len(1,length(Y))
-    weighted<-FALSE
-  }
-  NoVarModData<-data.frame(Y,weights)
 
-  No.Obs<-length(Y)
-  termsMODEL<-list(termsMEAN,termsSD)
-  formulaMODEL<-list('meaneq' = formulaMEAN, 'sdeq' = formulaSD)
-  # If specified that there is no constant in the model remove it from the data frame.
+  factorvars<-names(attr(attr(mf,"terms"),"dataClasses"))[attr(attr(mf,"terms"),"dataClasses")=="factor"]
+  attr(factorvars,"levels")<-lapply(factorvars,function(x){levels(mf[[x]])})
+  oglmxoutput$factorvars<-factorvars
+
+  mt<- attr(mf,"terms")
+  Y<-as.factor(model.response(mf,"numeric"))
+  outcomenames<-levels(Y)
+  oglmxoutput$Outcomes<-outcomenames
+
+  X<-model.matrix(formulaMEAN,mf)
+  factorvarsX<-names(attr(X,"contrasts"))
+
   if (!constantMEAN){
-    savecolnames<-colnames(X)[colnames(X)!="(Intercept)"]
-    X<-X[,colnames(X)!="(Intercept)",drop=FALSE]
-    colnames(X)<-savecolnames
+    Xint<-match("(Intercept)",colnames(X),nomatch = 0L)
+    if (Xint>0L){X<-X[,-Xint,drop=FALSE]}
   }
+  #termsMEAN<-terms(formulaMEAN)
+  weights<-as.vector(model.weights(mf))
+
+  oglmxoutput$NoVarModData<-data.frame(cbind(Y,weights))
+
+  No.Outcomes<-nlevels(Y)
+  if (No.Outcomes > 20 & !Force){
+    stop("More than 20 different values for outcome variable.\n If you are sure you wish to estimate this model rerun command with Force option set to TRUE.")
+  }
+
+  Y<-as.numeric(Y)
+  outcomeMatrix<-1 * ((col(matrix(0, length(Y), No.Outcomes))) == Y)
+  colnames(outcomeMatrix)<-outcomenames
+
+  oglmxoutput$NOutcomes<-No.Outcomes
+
+  if (!is.null(formulaSD)){
+    Z<-model.matrix(formulaSD,mf)
+    #termsSD<-terms(formulaSD)
+    oglmxoutput$Hetero<-TRUE
+    if (!constantSD){
+      Zint<-match("(Intercept)",colnames(Z),nomatch = 0L)
+      if (Zint>0L){Z<-Z[,-Zint,drop=FALSE]}
+    }
+  } else {
+    Z<-matrix(rep(1,nrow(X)),ncol=1)
+    oglmxoutput$Hetero<-FALSE
+  }
+
+  oglmxoutput$formula<-list(meaneq=formulaMEAN,sdeq=formulaSD)
+
+  # beta
+  if (!is.null(beta) & length(beta)==1){
+    beta<-c(beta,rep(NA,ncol(X)-1))
+  } else if (!is.null(beta) & length(beta)>1){
+    # check that the specified vector is of correct length
+    if (length(beta)!=ncol(X)){stop("Specified beta vector of incorrect length.")}
+  } else if (is.null(beta)){
+    beta<-rep(NA,ncol(X))
+  }
+  # delta
+  if (!is.null(delta) & length(delta)==1){
+    delta<-c(delta,rep(NA,ncol(Z)-1))
+  } else if (!is.null(delta) & length(delta)>1){
+    # check that the specified vector is of correct length
+    if (length(delta)!=ncol(Z)){stop("Specified delta vector of incorrect length.")}
+  } else if (is.null(delta)){
+    delta<-rep(NA,ncol(Z))
+  }
+  # threshparam
+  if (!is.null(threshparam) & length(threshparam)==1){
+    threshparam<-c(threshparam,rep(NA,No.Outcomes-2))
+  } else if (!is.null(threshparam) & length(threshparam)>1){
+    # check that the specified vector is of correct length
+    if (length(threshparam)!=No.Outcomes-1){stop("Specified vector of threshold parameters of incorrect length.")}
+  } else if (is.null(threshparam)){
+    threshparam<-rep(NA,No.Outcomes-1)
+  }
+
+  if (savemodelframe){
+    oglmxoutput$modelframes<-list(X=X,Z=Z)
+  }
+
+  if (oglmxoutput$Hetero){
+    namesX<-colnames(X)[colnames(X)!="(Intercept)"]
+    namesZ<-colnames(Z)[colnames(Z)!="(Intercept)"]
+    meanandvarNAME<-namesX[namesX %in% namesZ]
+    meanandvarLOC<-match(meanandvarNAME,colnames(X))
+    meanandvarLOCZ<-match(meanandvarNAME,colnames(Z))
+    oglmxoutput$BothEq<-data.frame(meanandvarNAME,meanandvarLOC,meanandvarLOCZ,stringsAsFactors = FALSE)
+  } else {oglmxoutput$BothEq<-NULL}
 
   # collect variable means and check which variables are binary.
   XVarMeans<-apply(X,2,mean)
   XVarBinary<-apply(X,2,.checkbinary)
 
-  Heteroskedastic<-TRUE # set model to heteroskedastic, check call and then switch if not.
-  if (!is.null(formulaSD)){
-    # will check if the formula for the mean is identical to the
-    # the right hand side variables of a formula are accessible via terms in the attribute term.labels
-    meaneqnames<-attr(terms(as.formula(formulaMEAN)),"term.labels")
-    sdeqnames<-attr(terms(as.formula(formulaSD)),"term.labels")
-    if (sum(is.na(match(meaneqnames,sdeqnames)))==sum(is.na(match(sdeqnames,meaneqnames))) & sum(is.na(match(sdeqnames,meaneqnames)))==0){
-      if (constantSD==constantMEAN){
-        SameModelMEANSD<-TRUE
-        # collect the names and column numbers of variables that are in both the mean and variance equation
-        meanandvarNAME<-colnames(X)
-        meanandvarLOC<-c(1:ncol(X))
-        meanandvarLOCZ<-meanandvarLOC<-meanandvarLOC[meanandvarNAME!="(Intercept)"]
-        meanandvarNAME<-meanandvarNAME[meanandvarNAME!="(Intercept)"]
-        BothMeanVar<-data.frame(meanandvarNAME,meanandvarLOC,meanandvarLOCZ,stringsAsFactors=FALSE)
-        ZVarMeans<-XVarMeans
-        ZVarBinary<-XVarBinary
-      }
-    }
-  }
+  ZVarMeans<-apply(Z,2,mean)
+  ZVarBinary<-apply(Z,2,.checkbinary)
 
-  if (!is.null(formulaSD) & !SameModelMEANSD){
-    if (!constantSD){Z<-Z[,colnames(Z)!="(Intercept)",drop=FALSE]}
-    ZVarMeans<-apply(Z,2,mean)
-    ZVarBinary<-apply(Z,2,.checkbinary)
-    # collect the names and column numbers of variables that are in both the mean and variance equation
-    # find the colnames of Z that are the same as the colnames of X
-    meanandvarLOC<-c(1:ncol(X))[!is.na(match(colnames(X),colnames(Z)))]
-    # find the columns of Z that are in Z and X
-    meanandvarLOCZ<-match(colnames(X),colnames(Z))[!is.na(match(colnames(X),colnames(Z)))]
-    meanandvarNAME<-colnames(X)[meanandvarLOC]
-    meanandvarLOC<-meanandvarLOC[meanandvarNAME!="(Intercept)"]
-    meanandvarLOCZ<-meanandvarLOCZ[meanandvarNAME!="(Intercept)"]
-    meanandvarNAME<-meanandvarNAME[meanandvarNAME!="(Intercept)"]
-    BothMeanVar<-data.frame(meanandvarNAME,meanandvarLOC,meanandvarLOCZ,stringsAsFactors=FALSE)
-  } else if (is.null(formulaSD) & !SameModelMEANSD){
-    Z<-as.matrix(rep(1,nrow(X)),ncol=1)
-    ZVarMeans<-NULL
-    ZVarBinary<-NULL
-    Heteroskedastic<-FALSE
-    if (is.null(delta) & is.null(threshparam)){
-      # if no formula for the standard deviation is given, the threshold parameters are not specified or the standard deviation is not specified then use the unit variance assumption.
-      calcdelta<-function(x){eval({z<-x;sdmodel})-1}
-      delta<-uniroot(calcdelta,c(-10,10),extendInt="yes",tol=.Machine$double.eps)$root # solve for delta to get the unit variance assumption
-    }
-    BothMeanVar=NULL
-  }
+  oglmxoutput$varMeans<-list(XVarMeans,ZVarMeans)
+  oglmxoutput$varBinary<-list(XVarBinary,ZVarBinary)
 
+  FitInput<-append(list(outcomeMatrix=outcomeMatrix,X=X,Z=Z,w=weights,beta=beta,delta=delta,threshparam=threshparam,
+                        start=start,optmeth="maxLik"),fitinput)
+  #return(FitInput)
+  results<-append(oglmxoutput,do.call("oglmx.fit",FitInput))
+  attr(results$loglikelihood,"No.Obs")<-length(Y)
 
-  checkoutcomes<-.checkoutcomes(Y,Force=Force)
-  listoutcomes<-checkoutcomes[[1]]
-  no.outcomes<-checkoutcomes[[2]]
-  #return(list(Y,X,X,weights,link,sdmodel,beta,delta,threshparam,analhessian,robust,start))
-  output<-oglmx.fit(Y,X,Z,w=weights,
-                    link = link,sdmodel = sdmodel,
-                    beta=beta,delta=delta,
-                    threshparam=threshparam,
-                    analhessian=analhessian,
-                    robustmatrix=robust,
-                    start=start,
-                    savemodelframe=savemodelframe,
-                    optmeth = optmeth)
-  output<-append(output,list(call=call,terms=termsMODEL,formula=formulaMODEL,NoVarModData=NoVarModData,Hetero=Heteroskedastic,BothEq=BothMeanVar,varMeans=list(XVarMeans,ZVarMeans),varBinary=list(XVarBinary,ZVarBinary)))
-  class(output)<-"oglmx"
-  output
+  class(results)<-"oglmx"
+  return(results)
+
+  #return(list(Y,X,Z,outcomeMatrix,weights))
 }
