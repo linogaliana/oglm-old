@@ -117,11 +117,10 @@ stata <- data.table::data.table(
   haven::read_dta("http://www.stata-press.com/data/r13/womenwage.dta")
 )
 
-stata2 <- stata[,.SD[1], by  = "wagecat"]
-stata2[,'wage1' := data.table::shift(wagecat)]
-stata2[,'wage2' := data.table::shift(wagecat, type = "lead")]
-stata2 <- stata2[,.SD,.SDcols = c("wagecat","wage1","wage2")]
-stata <- merge(stata,stata2)
+wage_lbounds <- sort(as.numeric(
+  unique(as.character(stata$wagecat)))
+)
+wage_lbounds <- wage_lbounds[-length(wage_lbounds)]
 
 
 model <- oglm::oglmx(
@@ -131,7 +130,7 @@ model <- oglm::oglmx(
   link = "probit",
   constantMEAN = TRUE,
   constantSD = TRUE,
-  threshparam = log(as.numeric(na.omit(unique(stata2$wage1))))
+  threshparam =  log(wage_lbounds)
 )
 # see Stata rintreg manual p.7
 
