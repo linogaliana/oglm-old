@@ -12,11 +12,18 @@ summary.oglmx <- function(object, tol=1e-20, ... ){
   deltaresults<-results[attr(object$coefficients,"coefftypes")[[2]], ,drop=FALSE]
   cutoffresults<-results[attr(object$coefficients,"coefftypes")[[3]], ,drop=FALSE]
   resultsSplit<-list(betaresults,deltaresults,cutoffresults)
-  summary<-list(regtype=.regtype.oglmx(object),loglikelihood=object$loglikelihood,estimate=results,estimateDisplay=resultsSplit,no.iterations=object$no.iterations,McFaddensR2=McFaddensR2.oglmx(object),AIC=AIC(object),coefficients=object$coefficients)
+  summary<-list(regtype=.regtype.oglmx(object),
+                loglikelihood=object$loglikelihood,
+                estimate=results,
+                estimateDisplay=resultsSplit,no.iterations=object$no.iterations,
+                McFaddensR2=McFaddensR2.oglmx(object, ...),
+                AIC=AIC(object),
+                coefficients=object$coefficients)
   class(summary)<-"summary.oglmx"
   summary
 }
 
+#' @export
 
 print.summary.oglmx<-function(x, ... ){
   cat(x$regtype,"\n")

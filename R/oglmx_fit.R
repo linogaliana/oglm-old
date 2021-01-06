@@ -551,8 +551,18 @@ oglmx.fit <- function(
   # the maxLik function used to maximise the log-likelihood requires a function of only the estimated parameters.
   LLoglmxTOP<-function(param){LLoglmx(param,beta=beta,delta=delta,threshparam=threshparam,analhessian=analhessian)}
   # call maxLik to estimate parameters
-  maxLikRes<-maxLik::maxLik(LLoglmxTOP,start=start,iterlim=300,finalHessian=TRUE,
-                            method=optmeth)
+  maxLikRes<-try(
+    maxLik::maxLik(LLoglmxTOP,start=start,iterlim=300,finalHessian=TRUE,
+                            method=optmeth),
+    silent = TRUE)
+
+  # if failed, try Nelder-Mead
+  if (inherits(maxLikRes, "try-error")){
+    message("model diverged")
+    maxLikRes <- maxLik::maxLik(LLoglmxTOP,start=start,iterlim=300,finalHessian=TRUE,
+                   method="NM")
+  }
+
   # just remains to extract results and store.
   #stop("getshere")
   coefficients<-maxLikRes$estimate

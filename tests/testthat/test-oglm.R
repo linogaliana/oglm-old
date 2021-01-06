@@ -21,6 +21,11 @@ y[latenty>= 1.5]<- 2
 dataset<-data.frame(y,x1,x2)
 
 
+requireNamespace("oglmx", quietly = TRUE)
+
+
+
+
 # POSSIBILITY TO CHANGE OPTIMIZATION METHOD -------------
 
 
@@ -100,3 +105,45 @@ testthat::test_that(
                    constantSD=FALSE,delta=0,threshparam=NULL)
     )
 })
+
+
+
+# COMPARE TO STATA ---------------------
+
+
+requireNamespace("haven", quietly = TRUE)
+
+stata <- haven::read_dta("http://www.stata-press.com/data/r13/womenwage.dta")
+
+wage_lbounds <- sort(as.numeric(
+  unique(as.character(stata$wagecat)))
+)
+wage_lbounds <- wage_lbounds[-length(wage_lbounds)]
+
+
+model <- oglm::oglmx(
+  data = stata,
+  formula = "wagecat ~ age + I(age^2) + nev_mar + rural + school + tenure",
+  formulaSD = NULL,
+  link = "probit",
+  constantMEAN = TRUE,
+  constantSD = TRUE,
+  threshparam =  log(wage_lbounds)
+)
+# see Stata rintreg manual p.7
+
+
+coefs_stata <- c(.7084023, .0645589, -.0010812, -.0058151, -.2098361,
+                 .0804832, .0397144, -.906989)
+# log(sigma) also estimated
+sd_stata <- c(.3593193, .0249954, .0004115, .0454867,
+              .0439454, .0076783, .0058001,
+              .0356265)
+
+testthat::expect_equal(
+  coefs_stata,
+  as.numeric(model$coefficients),
+  tolerance = 1e-5
+)
+
+
