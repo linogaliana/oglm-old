@@ -1,19 +1,21 @@
 .regtype.oglmx<-function(object){
-  if (sum(object$NoVarModData$weights==1)!=nrow(object$NoVarModData)){
-    Zero<-"Weighted "
+
+  if (ncol(object$NoVarModData)==2){
+
+    if (sum(object$NoVarModData$weights==1)!=nrow(object$NoVarModData)){ # this is needed for backwards compatibility, for saved data before v3
+      NotWeight<-FALSE
+    } else {
+      NotWeight<-TRUE
+    }
   } else {
-    Zero<-""
+    NotWeight<-TRUE
+
   }
-  if (object$Hetero){
-    First<-"Heteroskedastic "
-  } else {
-    First<-""
-  }
-  if (object$NOutcomes>2){
-    Second<-"Ordered "
-  } else {
-    Second<-""
-  }
+
+  Zero<-ifelse(NotWeight,"","Weighted ")
+  First<-ifelse(object$Hetero,"Heteroskedastic ","")
+  Second<-ifelse(object$NOutcomes>2,"Ordered ","")
+
   if (object$link=="logit"){
     Third<-"Logit "
   } else if (object$link=="probit"){
@@ -25,7 +27,10 @@
   } else if (object$link=="cauchit"){
     Third<-"Cauchit "
   }
+
   Fourth<-"Regression"
+
   value<-paste(Zero,First,Second,Third,Fourth,sep="")
+
   return(value)
 }
