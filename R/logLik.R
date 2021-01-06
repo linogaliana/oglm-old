@@ -5,7 +5,12 @@ logLik.oglmx<-function(object, ...){
 }
 
 .BaseLL<-function(object){
-  BaseLL<-as.numeric(logLik(oglmx(object$NoVarModData$Y~1,data=object$NoVarModData,weights=object$NoVarModData$weights)))
+  data<-object$NoVarModData
+  if (ncol(data)==2){
+    BaseLL<-as.numeric(logLik(oglmx(Y~1,data=data,weights=data$weights)))
+  } else {
+    BaseLL<-as.numeric(logLik(oglmx(Y~1,data=data)))
+  }
   return(BaseLL)
 }
 
